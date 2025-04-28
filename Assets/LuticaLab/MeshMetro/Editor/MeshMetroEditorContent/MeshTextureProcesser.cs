@@ -8,25 +8,30 @@ using static LuticaLab.LuticaLabLogger;
 using LuticaLab.MeshMetro;
 using LuticaSKID;
 using static LuticaSKID.Models.TextureImageProcessing.ImageProcessType;
+using System.IO;
 namespace LuticaLab.MeshMetro
 {
     public abstract class SKIDFlow : ScriptableObject
     {
         public abstract ImageProcessType GetOption();
         public abstract ImageProcessCommandOrder Order { get; set; }
-        public abstract float Scale { get; set; }
+        public abstract float Volume { get; set; }
+        public bool isShow;
     }
     public class SKIDTextureWorkflow : SKIDFlow
     {
         public Texture2D referenceTexture;
         private ImageProcessCommandOrder order;
-        private float scale;
+        private float volume;
 
-        public SKIDTextureWorkflow(Texture2D referenceTexture, ImageProcessCommandOrder order, float scale)
+        public SKIDTextureWorkflow(Texture2D referenceTexture, ImageProcessCommandOrder order, float volume)
         {
             this.referenceTexture = referenceTexture;
             this.order = order;
-            this.scale = scale;
+            this.volume = volume;
+            AutoCenterSelect = true;
+            Size = new(referenceTexture.width,referenceTexture.height);
+
         }
 
         public override ImageProcessCommandOrder Order
@@ -35,31 +40,32 @@ namespace LuticaLab.MeshMetro
             set => order = value;
         }
 
-        public override float Scale
+        public override float Volume
         {
-            get => scale;
-            set => scale = value;
+            get => volume;
+            set => volume = value;
         }
 
         public Vector2Int SetPoint { get; set; }
         public Vector2Int Size { get; set; }
         public bool AutoCenterSelect { get; set; }
         public float Angle { get; set; }
+        public bool AutoScale { get; set; }
       
         public override ImageProcessType GetOption()
         {
-            return GenerateToCommandOption(order, scale, referenceTexture);
+            return GenerateToCommandOption(order, Volume, referenceTexture);
         }
     }
     class SKIDTextureWorkflowSingle : SKIDFlow
     {
         private ImageProcessCommandOrder order;
-        private float scale;
+        private float volume;
 
-        public SKIDTextureWorkflowSingle(ImageProcessCommandOrder order, float scale)
+        public SKIDTextureWorkflowSingle(ImageProcessCommandOrder order, float volume)
         {
             this.order = order;
-            this.scale = scale;
+            this.volume = volume;
         }
 
         public override ImageProcessCommandOrder Order
@@ -68,15 +74,15 @@ namespace LuticaLab.MeshMetro
             set => order = value;
         }
 
-        public override float Scale
+        public override float Volume
         {
-            get => scale;
-            set => scale = value;
+            get => volume;
+            set => volume = value;
         }
 
         public override ImageProcessType GetOption()
         {
-            return GenerateToCommandOption(order, scale, null);
+            return GenerateToCommandOption(order, volume, null);
         }
     }
     public class MeshTextureProcessor : MeshMetroEditorContent
@@ -88,10 +94,9 @@ namespace LuticaLab.MeshMetro
         private List<SKIDFlow> orders = new();
         private SKIDFlow tempOrder;
 
-        private ImageProcessCommandOrder temp_order;
-        private bool toggleOrder;
+        private bool toggleOrder = true;
         private bool temp_is_need_two;
-        private float temp_scale;
+        private float temp_volume;
         private Vector2 scrolling_orders;
 
         private Texture2D processedTexture;
@@ -100,6 +105,7 @@ namespace LuticaLab.MeshMetro
         private float y_normal;
         private Texture2D processedNormal;
         private bool generateHeight;
+        private float x_height, y_height;
         private Texture2D processedHeight;
         private bool generateOcclusion;
         private Texture2D processedOcclusion;
@@ -108,16 +114,18 @@ namespace LuticaLab.MeshMetro
         private bool generateRoughness;
         private Texture2D processedRoughness;
 
+        
         public override void ShowOnMetro()
         {
             if (tempOrder == null)
             {
-                tempOrder = ScriptableObject.CreateInstance<SKIDTextureWorkflowSingle>();
+                tempOrder = CreateInstance<SKIDTextureWorkflowSingle>();
             }
 
             EditorGUILayout.LabelField("Mesh Texture Processor", EditorStyles.boldLabel);
             CreateField("Reference Mesh", ref referenceMesh);
             CreateTextureField("Original Texture", ref originalTexture);
+            ShowTempOrder();
 
             toggleOrder = EditorGUILayout.Foldout(toggleOrder, $"Show Order Queue Count:{orders.Count}");
             if (toggleOrder)
@@ -125,7 +133,6 @@ namespace LuticaLab.MeshMetro
                 ShowOrderQueue();
             }
 
-            ShowTempOrder();
             ShowGenerateOptions();
 
             if (GUILayout.Button("Execute"))
@@ -138,67 +145,147 @@ namespace LuticaLab.MeshMetro
 
         private void ShowOrderQueue()
         {
+            GUILayout.BeginVertical(GUI.skin.box);
             EditorGUILayout.LabelField($"Order Queue (Now Cound:{orders.Count})", EditorStyles.boldLabel);
             scrolling_orders = EditorGUILayout.BeginScrollView(scrolling_orders, GUILayout.Height(200));
             for (int i = 0; i < orders.Count; i++)
             {
+                GUILayout.BeginHorizontal(GUI.skin.box);
+                GUILayout.BeginVertical();
                 EditorGUILayout.LabelField($"Order {i + 1}: {orders[i].GetType().Name}");
                 ShowCurrentOrder(orders[i]);
+                GUILayout.EndVertical();
                 if (GUILayout.Button($"Remove Order {i + 1}"))
                 {
                     orders.RemoveAt(i);
-                    break;
                 }
+                
+                GUILayout.EndHorizontal();
             }
             EditorGUILayout.EndScrollView();
+            GUILayout.EndVertical();
         }
 
         private void ShowTempOrder()
         {
-            EditorGUILayout.BeginHorizontal();
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            EditorGUILayout.BeginVertical();
             EditorGUILayout.LabelField("Add Order");
-
-            var need_new = EditorGUILayout.Toggle(temp_is_need_two);
-            if (need_new != temp_is_need_two)
+            
+            GUILayout.Label("Command Type");
+            var order_new = (ImageProcessCommandOrder)EditorGUILayout.EnumPopup("Process Type", tempOrder.Order);
+            tempOrder.Order = order_new;
+            try // 뭔가 이유는 모르겠는데 포지션이 제대로 안잡힌다고 함.
             {
-                temp_is_need_two = need_new;
-                if (temp_is_need_two)
+                if (temp_is_need_two == true)
                 {
-                    tempOrder = ScriptableObject.CreateInstance<SKIDTextureWorkflow>();
+                    var v = tempOrder as SKIDTextureWorkflow;
+                    CreateTextureField("Reference Texture", ref tmp_referenceTexture);
+                    v.referenceTexture = tmp_referenceTexture;
+                    bool c = EditorGUILayout.Toggle("Auto Scale Set", v.AutoScale);
+                    v.AutoScale = c;
+                    if (!v.AutoScale)
+                    {
+                        v.Size = EditorGUILayout.Vector2IntField("Image Size", v.SetPoint);
+                    }
+                    v.AutoCenterSelect = EditorGUILayout.Toggle("Auto Center", v.AutoCenterSelect);
+                    if (!v.AutoCenterSelect)
+                    {
+                        v.SetPoint = EditorGUILayout.Vector2IntField("Set Point", v.SetPoint);
+                    }
+                    v.Angle = EditorGUILayout.FloatField("Angle", v.Angle);
+                    temp_volume = EditorGUILayout.FloatField("Volume", temp_volume);
                 }
                 else
                 {
-                    tempOrder = ScriptableObject.CreateInstance<SKIDTextureWorkflowSingle>();
+                    temp_volume = EditorGUILayout.FloatField("Volume", temp_volume);
                 }
+            } 
+            catch
+            {
 
             }
-            if (temp_is_need_two)
-            {
-                var v = tempOrder as SKIDTextureWorkflow;
-                CreateTextureField("Reference Texture", ref v.referenceTexture);
-            }
-            tempOrder.Order = (ImageProcessCommandOrder)EditorGUILayout.EnumPopup("Process Type", tempOrder.Order);
-            temp_scale = EditorGUILayout.FloatField("Scale", temp_scale);
+            
+            EditorGUILayout.EndVertical();
 
-            if (GUILayout.Button("Add"))
+            EditorGUILayout.BeginHorizontal();
+
+            var need_new = CheckNeedTwoImage(order_new);
+            if (need_new != temp_is_need_two)
             {
-                orders.Add(tempOrder);
-                tmp_referenceTexture = null;
-                tempOrder = temp_is_need_two
-                    ? ScriptableObject.CreateInstance<SKIDTextureWorkflow>()
-                    : ScriptableObject.CreateInstance<SKIDTextureWorkflowSingle>();
+                temp_is_need_two = need_new;
+                if (temp_is_need_two == true)
+                {
+                    tempOrder = CreateInstance<SKIDTextureWorkflow>();
+                    var workflow = tempOrder as SKIDTextureWorkflow;
+                    workflow.AutoScale = true;
+                    workflow.AutoCenterSelect = true;
+                }
+                else
+                {
+                    tempOrder = CreateInstance<SKIDTextureWorkflowSingle>();
+                }
+                tempOrder.Order = order_new;
+                tempOrder.Volume = temp_volume;
+
+
             }
 
             EditorGUILayout.EndHorizontal();
+            if (GUILayout.Button("Add"))
+            {
+                tempOrder.Order = order_new;
+                tempOrder.Volume = temp_volume;
+
+                if (temp_is_need_two == true && tmp_referenceTexture == null)
+                {
+                    Log("Reference Texture is not set", EditorLogLevel.Error);
+                    return;
+                } 
+                else
+                {
+                    orders.Add(tempOrder);
+                    temp_volume = 0;
+                    tmp_referenceTexture = null;
+                    tempOrder = temp_is_need_two
+                        ? ScriptableObject.CreateInstance<SKIDTextureWorkflow>()
+                        : ScriptableObject.CreateInstance<SKIDTextureWorkflowSingle>();
+                    if (tempOrder is SKIDTextureWorkflow workflow)
+                    {
+                        workflow.AutoScale = true;
+                        workflow.AutoCenterSelect = true;
+                        temp_is_need_two = true;
+                    }
+                    else
+                    {
+                        temp_is_need_two = false;
+                    }
+                }
+               
+            }
+            
+            GUILayout.EndHorizontal();
         }
 
         private void ShowCurrentOrder(SKIDFlow order)
         {
-            EditorGUILayout.LabelField($"Order Type: {order.Order}");
-            EditorGUILayout.LabelField($"Scale: {order.Scale}");
+            EditorGUILayout.LabelField($"Order Type: {order.Order}",EditorStyles.boldLabel);
+            order.Volume = EditorGUILayout.FloatField("Volume", order.Volume);
             if (order is SKIDTextureWorkflow workflow)
             {
                 CreateTextureField("Reference Texture", ref workflow.referenceTexture);
+                bool zc = EditorGUILayout.Toggle("Auto Center Select",workflow.AutoScale);
+                if (!workflow.AutoScale)
+                {
+                    workflow.Size = EditorGUILayout.Vector2IntField("Attach Image Size", workflow.Size);
+                }
+                workflow.AutoCenterSelect = EditorGUILayout.Toggle("Auto Center Select", workflow.AutoCenterSelect);
+                if (!workflow.AutoCenterSelect)
+                {
+                    workflow.SetPoint = EditorGUILayout.Vector2IntField("Set Point", workflow.SetPoint);
+                }
+                workflow.AutoScale = zc;
+                workflow.Angle = EditorGUILayout.FloatField("Angle", workflow.Angle);
             }
         }
 
@@ -207,7 +294,6 @@ namespace LuticaLab.MeshMetro
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Generate Normal Map");
             genetareNormal = EditorGUILayout.Toggle(genetareNormal);
-            EditorGUILayout.EndHorizontal();
 
             if (genetareNormal)
             {
@@ -216,10 +302,18 @@ namespace LuticaLab.MeshMetro
                 y_normal = EditorGUILayout.FloatField("Y Normal", y_normal);
                 EditorGUILayout.EndHorizontal();
             }
+            EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Generate Height Map");
             generateHeight = EditorGUILayout.Toggle(generateHeight);
+            if (generateHeight)
+            {
+                EditorGUILayout.BeginHorizontal();
+                x_height = EditorGUILayout.FloatField("X Height", x_height);
+                y_height = EditorGUILayout.FloatField("Y Height", y_height);
+                EditorGUILayout.EndHorizontal();
+            }
             EditorGUILayout.EndHorizontal();
         }
 
@@ -247,7 +341,7 @@ namespace LuticaLab.MeshMetro
             processedNormal = ConvertToTexture(processedImage);
         }
 
-        private void ProcessExecute()
+        private void GenerateHeightMap(SKIDImage img)
         {
             if (originalTexture == null)
             {
@@ -260,11 +354,35 @@ namespace LuticaLab.MeshMetro
                 LuticaLabFolderManager.AssetSetReadWrite(originalTexture);
             }
 
+            var cmd = ImageProcessCommand.NewProcessToHeightMap(
+                new ImageProcessInput<LuticaSKID.Models.HeightMapModel.HeightMapConfig>(
+                    img,
+                    new LuticaSKID.Models.HeightMapModel.HeightMapConfig(x_height, y_height)
+                )
+            );
+
+            var processedImage = Generator.Process(cmd);
+            processedHeight = ConvertToTexture(processedImage);
+        }
+
+        private void ProcessExecute()
+        {
+            if (originalTexture == null)
+            {
+                Log("originalTexture is not indecated.", EditorLogLevel.Error);
+                return;
+            }
+
+            if (!originalTexture.isReadable)
+            {
+                LuticaLabFolderManager.AssetSetReadWrite(originalTexture);
+            }
+
             var imageInte = ConvertTexture(originalTexture);
             foreach (var order in orders)
             {
                 var option = order.GetOption();
-                var imageProcessInputOption = new ImageProcessInputOption(option, order.Scale);
+                var imageProcessInputOption = new ImageProcessInputOption(option, order.Volume);
                 var cmd2 = new ImageProcessInput<ImageProcessInputOption>(imageInte, config: imageProcessInputOption);
                 if (order is SKIDTextureWorkflowSingle)
                 {
@@ -276,13 +394,22 @@ namespace LuticaLab.MeshMetro
                     var opt = generated.GetOption();
                     if (opt is not TwoImageProcess f)
                     {
-                        Debug.LogError("Invalid order type");
+                        Log("Invalid order type", EditorLogLevel.Error);
                         return;
                     }
                     if(!generated.referenceTexture.isReadable)
                     {
                         LuticaLabFolderManager.AssetSetReadWrite(generated.referenceTexture);
                     }
+                    if(generated.AutoScale == true)
+                    {
+                        generated.Size = new Vector2Int(generated.referenceTexture.width, generated.referenceTexture.height);
+                    }
+                    if(generated.AutoCenterSelect == true)
+                    {
+                        generated.SetPoint = new Vector2Int(originalTexture.width / 2, originalTexture.height / 2);
+                    }
+                    Log($"size X:{generated.Size.x} size Y:{generated.Size.y} Angle {generated.Angle}");
                     imageInte = Generator.Process(ImageProcessCommand.NewProcessImageWithPartial(
                         new ImageProcessInput<SimpleImageSynArgu>(
                             imageInte,
@@ -295,7 +422,7 @@ namespace LuticaLab.MeshMetro
                                     new SKIDPixelVector2(generated.SetPoint.x, generated.SetPoint.y),
                                     generated.Angle
                                 ),
-                                generated.Scale
+                                generated.Volume
                             )
                         )
                     ));
@@ -306,25 +433,49 @@ namespace LuticaLab.MeshMetro
             {
                 GenerateNormalMap(imageInte);
             }
+            if (generateHeight)
+            {
+                GenerateHeightMap(imageInte);
+            }
 
             processedTexture = ConvertToTexture(imageInte);
         }
 
         private void ShowAllPreview()
         {
-            ShowTexturePreview(processedTexture);
-            ShowTexturePreview(processedNormal);
-            ShowTexturePreview(processedHeight);
-            ShowTexturePreview(processedOcclusion);
-            ShowTexturePreview(processedMetallic);
-            ShowTexturePreview(processedRoughness);
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            ShowTexturePreview(processedTexture,"Generated Texture");
+            ShowTexturePreview(processedNormal, "Generated Normal");
+            ShowTexturePreview(processedHeight, "Generated Height");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal(GUI.skin.box);
+            ShowTexturePreview(processedOcclusion, "Generated Occlusion");
+            ShowTexturePreview(processedMetallic, "Generated Metallic");
+            ShowTexturePreview(processedRoughness, "Generated Roughness");
+            GUILayout.EndHorizontal();
         }
 
-        private void ShowTexturePreview(Texture2D texture)
+        private void ShowTexturePreview(Texture2D texture,string name)
         {
             if (texture != null)
             {
+                GUILayout.BeginVertical();
+                GUILayout.Label(name, EditorStyles.boldLabel);
                 CreateTextureDisplayField(texture, GUILayout.Width(200), GUILayout.Height(200));
+                if (GUILayout.Button("Save..."))
+                {
+                    string path = EditorUtility.SaveFilePanel("Save Generated Texture",
+                        AssetDatabase.GetAssetPath(texture),
+                        $"GeneratedTexture.png", "png");
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        byte[] bytes = texture.EncodeToPNG();
+                        File.WriteAllBytes(path, bytes);
+                        AssetDatabase.Refresh();
+                        Log("Generated texture saved to: " + path);
+                    }
+                }
+                GUILayout.EndVertical();
             }
         }
     }

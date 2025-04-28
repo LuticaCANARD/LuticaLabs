@@ -54,9 +54,7 @@ namespace LuticaLab.MeshMetro
                     }
                 }
                 GUILayout.Label("Normal Map Preview:", EditorStyles.boldLabel);
-                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,
-                true, true
-                );
+                scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,true, true);
                 GUILayout.Label(normalMapPreviewTex,
                     GUILayout.Width(normalMapPreviewTex.width),
                     GUILayout.Height(normalMapPreviewTex.height));

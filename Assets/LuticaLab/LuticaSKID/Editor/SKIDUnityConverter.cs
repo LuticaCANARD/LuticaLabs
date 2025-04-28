@@ -27,13 +27,14 @@ namespace LuticaLab
         Brightness,
         Contrast,
         Grayscale,
-
+        Median,
     }
+   
     public static class SKIDUnityConverter
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SKIDImage ConvertTexture(Texture2D tex) => new (ConvertToSKID(tex.GetPixels32()), tex.width, tex.height);
-        
+        public static SKIDImage ConvertTexture(Texture2D tex) => new(ConvertToSKID(tex.GetPixels32()), tex.width, tex.height);
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static Texture2D ConvertToTexture(SKIDImage skidImage)
         {
@@ -97,7 +98,7 @@ namespace LuticaLab
             SKIDVector2[] result = new SKIDVector2[vectors.Count];
             Parallel.For(0, vectors.Count, i => result[i] = ConvertToSKID(vectors[i]));
             return result;
-        } 
+        }
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static SKIDVector3[] ConvertToSKID(Vector3[] vectors)
         {
@@ -128,20 +129,20 @@ namespace LuticaLab
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SKIDImage GenerateMaskMap(Mesh mesh, SKIDImage mask,byte uv_chanel_bit)
+        public static SKIDImage GenerateMaskMap(Mesh mesh, SKIDImage mask, byte uv_chanel_bit)
         {
             if (mesh == null || mask == null)
                 throw new ArgumentNullException("Mesh or mask cannot be null.");
-            List<Vector2> uvs = new ();
-            if((uv_chanel_bit & (1 << 0)) == 1) uvs.AddRange(mesh.uv); // UV0
-            if((uv_chanel_bit & (1 << 1)) >= 1) uvs.AddRange(mesh.uv2); // UV1
-            if((uv_chanel_bit & (1 << 2)) >= 1) uvs.AddRange(mesh.uv3); // UV2
-            if((uv_chanel_bit & (1 << 3)) >= 1) uvs.AddRange(mesh.uv4); // UV3
-            if((uv_chanel_bit & (1 << 4)) >= 1) uvs.AddRange(mesh.uv5); // UV4
-            if((uv_chanel_bit & (1 << 5)) >= 1) uvs.AddRange(mesh.uv6); // UV5
-            if((uv_chanel_bit & (1 << 6)) >= 1) uvs.AddRange(mesh.uv7); // UV6
-            if((uv_chanel_bit & (1 << 7)) >= 1) uvs.AddRange(mesh.uv8); // UV7
-            if(uvs.Count == 0)
+            List<Vector2> uvs = new();
+            if ((uv_chanel_bit & (1 << 0)) == 1) uvs.AddRange(mesh.uv); // UV0
+            if ((uv_chanel_bit & (1 << 1)) >= 1) uvs.AddRange(mesh.uv2); // UV1
+            if ((uv_chanel_bit & (1 << 2)) >= 1) uvs.AddRange(mesh.uv3); // UV2
+            if ((uv_chanel_bit & (1 << 3)) >= 1) uvs.AddRange(mesh.uv4); // UV3
+            if ((uv_chanel_bit & (1 << 4)) >= 1) uvs.AddRange(mesh.uv5); // UV4
+            if ((uv_chanel_bit & (1 << 5)) >= 1) uvs.AddRange(mesh.uv6); // UV5
+            if ((uv_chanel_bit & (1 << 6)) >= 1) uvs.AddRange(mesh.uv7); // UV6
+            if ((uv_chanel_bit & (1 << 7)) >= 1) uvs.AddRange(mesh.uv8); // UV7
+            if (uvs.Count == 0)
             {
                 throw new Exception("Error On GET UV..");
             }
@@ -195,7 +196,7 @@ namespace LuticaLab
             return alpha >= 0 && beta >= 0 && gamma >= 0;
         }
 
-        public static byte MakeUVChanelBit(bool uv0, bool uv1=false, bool uv2=false, bool uv3=false, bool uv4=false, bool uv5=false, bool uv6=false, bool uv7=false)
+        public static byte MakeUVChanelBit(bool uv0, bool uv1 = false, bool uv2 = false, bool uv3 = false, bool uv4 = false, bool uv5 = false, bool uv6 = false, bool uv7 = false)
         {
             byte result = 0;
             if (uv0) result |= 1 << 0;
@@ -209,8 +210,12 @@ namespace LuticaLab
             return result;
         }
 
-        public static ImageProcessType GenerateToCommandOption(ImageProcessCommandOrder cmd,float constantValue, Texture2D texRef = null)
+        public static ImageProcessType GenerateToCommandOption(ImageProcessCommandOrder cmd, float constantValue, Texture2D texRef = null)
         {
+            if(texRef != null && !texRef.isReadable)
+            {
+                LuticaLabFolderManager.AssetSetReadWrite(texRef);
+            }
             return cmd switch
             {
                 ImageProcessCommandOrder.Add => ImageProcessType.NewTwoImageProcess(
@@ -248,16 +253,30 @@ namespace LuticaLab
                 ImageProcessCommandOrder.Invert => ImageProcessType.NewSingleImageProcess(
                     SingleImageProcessType.Invert
                 ),
-                //ImageProcessCommandOrder.Brightness => ImageProcessType.NewSingleImageProcess(
-                //    SingleImageProcessType.Brightness,
-                //    new SingleImageProcessOption(constantValue)
-                //),
-                _ => throw new System.NotImplementedException("Unknown Image Process Command"),
+                ImageProcessCommandOrder.Median => ImageProcessType.NewSingleImageProcess(
+                    SingleImageProcessType.Median
+                ),
+                _ => throw new System.NotImplementedException("Unknown Image Process Command : " + cmd.GetType().FullName),
             };
         }
-    }
-    
+        public static bool CheckNeedTwoImage(ImageProcessCommandOrder cmd)
+        {
+            return cmd switch
+            {
+                ImageProcessCommandOrder.Add => true,
+                ImageProcessCommandOrder.Subtract => true,
+                ImageProcessCommandOrder.Multiply => true,
+                ImageProcessCommandOrder.Divide => true,
+                ImageProcessCommandOrder.AverageImage => true,
+                ImageProcessCommandOrder.BlondColor => true,
+                ImageProcessCommandOrder.ReplaceTexture => true,
+                ImageProcessCommandOrder.ColorDifference => true,
+                _ => false,
+            };
+        }
+
 
     }
+}
 
 #endif

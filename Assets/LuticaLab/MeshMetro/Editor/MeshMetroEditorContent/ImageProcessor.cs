@@ -18,7 +18,6 @@ namespace LuticaLab.MeshMetro
     public class ImageProcessor : MeshMetroEditorContent
     {
 
-
         private Texture2D texTarget;
         private Texture2D texRef;
         private Texture2D texResult;
@@ -26,16 +25,16 @@ namespace LuticaLab.MeshMetro
         private float constantValue;
         private Vector2 ImageScrollVector;
 
-       
-
         public override void ShowOnMetro()
         {
             EditorGUILayout.LabelField("Image Process", EditorStyles.boldLabel);
             texTarget = (Texture2D)EditorGUILayout.ObjectField("Target Texture", texTarget, typeof(Texture2D), false);
-            texRef = (Texture2D)EditorGUILayout.ObjectField("Reference Texture", texRef, typeof(Texture2D), false);
             processType = (ImageProcessCommandOrder)EditorGUILayout.EnumPopup("Process Type", processType);
+            if (CheckNeedTwoImage(processType))
+            {
+                texRef = (Texture2D)EditorGUILayout.ObjectField("Reference Texture", texRef, typeof(Texture2D), false);
+            }
             constantValue = EditorGUILayout.FloatField("Constant Value", constantValue);
-
             if (GUILayout.Button("Process"))
             {
                 ProcessImage();
@@ -73,6 +72,7 @@ namespace LuticaLab.MeshMetro
 
             SKIDImage skidImage = ConvertTexture(texTarget);
             ImageProcessType cmd = GenerateToCommandOption(processType, constantValue,texRef);
+
             ImageProcessInputOption order = new(cmd,1.1f);
 
             var cmd2 = new ImageProcessInput<ImageProcessInputOption>(skidImage, config: order);
