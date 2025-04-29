@@ -1,17 +1,13 @@
 {
-    "name": "LuticaLab",
+    "name": "FSharpAsmDef",
     "rootNamespace": "",
-    "references": [
-        "GUID:29fdf89d36466e546bf5f9270100e8bf"
-    ],
+    "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "ILGPU.dll",
-        "LuticaSKID.dll",
-        "System.Reflection.Metadata.dll"
+        "FSharp.Core.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
