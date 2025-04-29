@@ -1,0 +1,43 @@
+{
+    "data":{
+        "Mesh Texture Processor" : "메쉬 텍스처 프로세서",
+        "Reference Mesh" : "참조 메쉬",
+        "Original Texture" : "원본 텍스처",
+        "Show Order Queue Count:{0}" : "오더 큐 수 표시:{0}",
+        "Order {0}: {1}" : "오더 {0}: {1}",
+        "Remove Order {0}" : "오더 {0} 제거",
+        "Order Type: {0}" : "오더 타입: {0}",
+        "Volume" : "볼륨",
+        "Reference Texture" : "참조 텍스처",
+        "Auto Center Select" : "자동 중앙 선택",
+        "Auto Scale" : "자동 스케일",
+        "Attach Image Size": "첨부 이미지 크기",
+        "Set Point" : "참조 이미지를 배치하기 위한 포인트 설정",
+        "Angle": "각도",
+        "{0} Normal": "{0} 노말 강도",
+        "{0} Height" : "{0} 높이 강도",
+        "Generate Height Map" : "높이 맵 생성",
+        "Generated Texture" : "생성된 텍스처",
+        "Generated Normal" : "생성된 노말",
+        "Generated Height" : "생성된 높이 맵",
+        "Generated Occlusion" : "생성된 오클루전",
+        "Generated Roughness" : "생성된 거칠기",
+        "Generated Metallic" : "생성된 금속성",
+        "Add Order" : "오더 추가",
+        "Command Type": "명령 유형",
+        "Process Type": "프로세스 유형",
+        "Auto Scale Set":"자동 스케일 설정",
+        "Image Size": "이미지 크기",
+        "Auto Center": "자동 중앙",
+        "Add" : "추가",
+
+        "Normal Map Generator" : "노말 맵 생성기",
+        "Source Image" : "원본 이미지",
+        "Normal Map Preview" : "노말 맵 미리보기",
+        "Generate Normal Map" : "노말 맵 생성",
+        "Save Normal Map" : "노말 맵 저장",
+        "Please select a source image" : "원본 이미지를 선택해 주세요",
+        "{0} Factor" : "{0} 계수"
+    
+    }
+}

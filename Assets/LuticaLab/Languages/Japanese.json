@@ -1,0 +1,46 @@
+{
+    "data":{
+        "Mesh Texture Processor" : "メッシュテクスチャプロセッサ",
+        "Reference Mesh" : "参照メッシュ",
+        "Original Texture" : "オリジナルテクスチャ",
+        "Show Order Queue Count:{0}" : "オーダーキュー数を表示:{0}",
+        "Order {0}: {1}" : "オーダー {0}: {1}",
+        "Remove Order {0}" : "オーダー {0} を削除",
+        "Order Type: {0}" : "オーダータイプ: {0}",
+        "Volume" : "ボリューム",
+        "Reference Texture" : "参照テクスチャ",
+        "Auto Center Select" : "自動センター選択",
+        "Auto Scale" : "自動スケール",
+        "Attach Image Size": "アタッチ画像サイズ",
+        "Set Point" : "参照画像を配置するためのポイント設定",
+        "Angle": "角度",
+        "{0} Normal": "{0} ノーマル強度",
+        "{0} Height" : "{0} 高さ強度",
+        "Generate Height Map" : "高さマップ生成",
+        "Generated Texture" : "生成されたテクスチャ",
+        "Generated Normal" : "生成されたノーマル",
+        "Generated Height" : "生成されたハイトマップ",
+        "Generated Occlusion" : "生成されたオクルージョン",
+        "Generated Roughness" : "生成されたラフネス",
+        "Generated Metallic" : "生成されたメタリック",
+        "Add Order" : "オーダー追加",
+        "Command Type": "コマンドタイプ",
+        "Process Type": "プロセスタイプ",
+        "Auto Scale Set":"自動スケール設定",
+        "Image Size": "画像サイズ",
+        "Auto Center": "自動センター",
+        "Add" : "追加",
+        
+
+        
+
+        "Normal Map Generator" : "ノーマルマップジェネレーター",
+        "Source Image" : "ソース画像",
+        "Normal Map Preview" : "ノーマルマッププレビュー",
+        "Generate Normal Map" : "ノーマルマップ生成",
+        "Save Normal Map" : "ノーマルマップ保存",
+        "Please select a source image" : "ソース画像を選択してください",
+        "{0} Factor" : "{0} ファクター"
+    }
+    
+}

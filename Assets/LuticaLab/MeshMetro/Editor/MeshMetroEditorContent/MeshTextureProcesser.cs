@@ -87,6 +87,7 @@ namespace LuticaLab.MeshMetro
     }
     public class MeshTextureProcessor : MeshMetroEditorContent
     {
+        const int MAX_ORDER_SHOW_HEIGHT = 500;
         private Mesh referenceMesh;
         private Texture2D originalTexture;
         private Texture2D tmp_referenceTexture;
@@ -122,12 +123,13 @@ namespace LuticaLab.MeshMetro
                 tempOrder = CreateInstance<SKIDTextureWorkflowSingle>();
             }
 
-            EditorGUILayout.LabelField("Mesh Texture Processor", EditorStyles.boldLabel);
-            CreateField("Reference Mesh", ref referenceMesh);
-            CreateTextureField("Original Texture", ref originalTexture);
+            EditorGUILayout.LabelField(
+                TranslateString("Mesh Texture Processor"), EditorStyles.boldLabel);
+            CreateField(TranslateString("Reference Mesh"), ref referenceMesh);
+            CreateTextureField(TranslateString("Original Texture"), ref originalTexture);
             ShowTempOrder();
 
-            toggleOrder = EditorGUILayout.Foldout(toggleOrder, $"Show Order Queue Count:{orders.Count}");
+            toggleOrder = EditorGUILayout.Foldout(toggleOrder, string.Format(TranslateString("Show Order Queue Count:{0}"), orders.Count));
             if (toggleOrder)
             {
                 ShowOrderQueue();
@@ -135,7 +137,7 @@ namespace LuticaLab.MeshMetro
 
             ShowGenerateOptions();
 
-            if (GUILayout.Button("Execute"))
+            if (GUILayout.Button(TranslateString("Execute")))
             {
                 ProcessExecute();
             }
@@ -146,16 +148,16 @@ namespace LuticaLab.MeshMetro
         private void ShowOrderQueue()
         {
             GUILayout.BeginVertical(GUI.skin.box);
-            EditorGUILayout.LabelField($"Order Queue (Now Cound:{orders.Count})", EditorStyles.boldLabel);
-            scrolling_orders = EditorGUILayout.BeginScrollView(scrolling_orders, GUILayout.Height(200));
+            scrolling_orders = EditorGUILayout.BeginScrollView(scrolling_orders, GUILayout.Height(MAX_ORDER_SHOW_HEIGHT));
             for (int i = 0; i < orders.Count; i++)
             {
                 GUILayout.BeginHorizontal(GUI.skin.box);
                 GUILayout.BeginVertical();
-                EditorGUILayout.LabelField($"Order {i + 1}: {orders[i].GetType().Name}");
+                EditorGUILayout.LabelField(string.Format(TranslateString("Order {0}: {1}"), i + 1, orders[i].GetType().Name));
+
                 ShowCurrentOrder(orders[i]);
                 GUILayout.EndVertical();
-                if (GUILayout.Button($"Remove Order {i + 1}"))
+                if (GUILayout.Button(string.Format(TranslateString("Remove Order {0}"),i+1)))
                 {
                     orders.RemoveAt(i);
                 }
@@ -170,35 +172,35 @@ namespace LuticaLab.MeshMetro
         {
             GUILayout.BeginHorizontal(GUI.skin.box);
             EditorGUILayout.BeginVertical();
-            EditorGUILayout.LabelField("Add Order");
+            EditorGUILayout.LabelField(TranslateString("Add Order"));
             
             GUILayout.Label("Command Type");
-            var order_new = (ImageProcessCommandOrder)EditorGUILayout.EnumPopup("Process Type", tempOrder.Order);
+            var order_new = (ImageProcessCommandOrder)EditorGUILayout.EnumPopup(TranslateString("Process Type"), tempOrder.Order);
             tempOrder.Order = order_new;
             try // 뭔가 이유는 모르겠는데 포지션이 제대로 안잡힌다고 함.
             {
                 if (temp_is_need_two == true)
                 {
                     var v = tempOrder as SKIDTextureWorkflow;
-                    CreateTextureField("Reference Texture", ref tmp_referenceTexture);
+                    CreateTextureField(TranslateString("Reference Texture"), ref tmp_referenceTexture);
                     v.referenceTexture = tmp_referenceTexture;
-                    bool c = EditorGUILayout.Toggle("Auto Scale Set", v.AutoScale);
+                    bool c = EditorGUILayout.Toggle(TranslateString("Auto Scale Set"), v.AutoScale);
                     v.AutoScale = c;
                     if (!v.AutoScale)
                     {
-                        v.Size = EditorGUILayout.Vector2IntField("Image Size", v.SetPoint);
+                        v.Size = EditorGUILayout.Vector2IntField(TranslateString("Image Size"), v.SetPoint);
                     }
-                    v.AutoCenterSelect = EditorGUILayout.Toggle("Auto Center", v.AutoCenterSelect);
+                    v.AutoCenterSelect = EditorGUILayout.Toggle(TranslateString("Auto Center"), v.AutoCenterSelect);
                     if (!v.AutoCenterSelect)
                     {
-                        v.SetPoint = EditorGUILayout.Vector2IntField("Set Point", v.SetPoint);
+                        v.SetPoint = EditorGUILayout.Vector2IntField(TranslateString("Set Point"), v.SetPoint);
                     }
-                    v.Angle = EditorGUILayout.FloatField("Angle", v.Angle);
-                    temp_volume = EditorGUILayout.FloatField("Volume", temp_volume);
+                    v.Angle = EditorGUILayout.FloatField(TranslateString("Angle"), v.Angle);
+                    temp_volume = EditorGUILayout.FloatField(TranslateString("Volume"), temp_volume);
                 }
                 else
                 {
-                    temp_volume = EditorGUILayout.FloatField("Volume", temp_volume);
+                    temp_volume = EditorGUILayout.FloatField(TranslateString("Volume"), temp_volume);
                 }
             } 
             catch
@@ -206,10 +208,6 @@ namespace LuticaLab.MeshMetro
 
             }
             
-            EditorGUILayout.EndVertical();
-
-            EditorGUILayout.BeginHorizontal();
-
             var need_new = CheckNeedTwoImage(order_new);
             if (need_new != temp_is_need_two)
             {
@@ -231,8 +229,7 @@ namespace LuticaLab.MeshMetro
 
             }
 
-            EditorGUILayout.EndHorizontal();
-            if (GUILayout.Button("Add"))
+            if (GUILayout.Button(TranslateString("Add")))
             {
                 tempOrder.Order = order_new;
                 tempOrder.Volume = temp_volume;
@@ -263,54 +260,58 @@ namespace LuticaLab.MeshMetro
                 }
                
             }
-            
+            EditorGUILayout.EndVertical();
+
+
+
             GUILayout.EndHorizontal();
         }
 
         private void ShowCurrentOrder(SKIDFlow order)
         {
-            EditorGUILayout.LabelField($"Order Type: {order.Order}",EditorStyles.boldLabel);
-            order.Volume = EditorGUILayout.FloatField("Volume", order.Volume);
+            EditorGUILayout.LabelField(
+                string.Format(TranslateString("Order Type: {0}"), order.Order),EditorStyles.boldLabel);
+            order.Volume = EditorGUILayout.FloatField(TranslateString("Volume"), order.Volume);
             if (order is SKIDTextureWorkflow workflow)
             {
-                CreateTextureField("Reference Texture", ref workflow.referenceTexture);
-                bool zc = EditorGUILayout.Toggle("Auto Center Select",workflow.AutoScale);
+                CreateTextureField(TranslateString("Reference Texture"), ref workflow.referenceTexture);
+                bool zc = EditorGUILayout.Toggle(TranslateString("Auto Scale"),workflow.AutoScale);
                 if (!workflow.AutoScale)
                 {
-                    workflow.Size = EditorGUILayout.Vector2IntField("Attach Image Size", workflow.Size);
+                    workflow.Size = EditorGUILayout.Vector2IntField(TranslateString("Attach Image Size"), workflow.Size);
                 }
-                workflow.AutoCenterSelect = EditorGUILayout.Toggle("Auto Center Select", workflow.AutoCenterSelect);
+                workflow.AutoCenterSelect = EditorGUILayout.Toggle(TranslateString("Auto Center Select"), workflow.AutoCenterSelect);
                 if (!workflow.AutoCenterSelect)
                 {
-                    workflow.SetPoint = EditorGUILayout.Vector2IntField("Set Point", workflow.SetPoint);
+                    workflow.SetPoint = EditorGUILayout.Vector2IntField(TranslateString("Set Point"), workflow.SetPoint);
                 }
                 workflow.AutoScale = zc;
-                workflow.Angle = EditorGUILayout.FloatField("Angle", workflow.Angle);
+                workflow.Angle = EditorGUILayout.FloatField(TranslateString("Angle"), workflow.Angle);
             }
         }
 
         private void ShowGenerateOptions()
         {
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Generate Normal Map");
+            EditorGUILayout.LabelField(TranslateString("Generate Normal Map"));
             genetareNormal = EditorGUILayout.Toggle(genetareNormal);
 
             if (genetareNormal)
             {
                 EditorGUILayout.BeginHorizontal();
-                x_normal = EditorGUILayout.FloatField("X Normal", x_normal);
-                y_normal = EditorGUILayout.FloatField("Y Normal", y_normal);
+                x_normal = EditorGUILayout.FloatField(string.Format(TranslateString("{0} Normal"), "X"), x_normal);
+                y_normal = EditorGUILayout.FloatField(string.Format(TranslateString("{0} Normal"), "Y"), y_normal);
                 EditorGUILayout.EndHorizontal();
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.BeginHorizontal();
-            EditorGUILayout.LabelField("Generate Height Map");
+            EditorGUILayout.LabelField(TranslateString("Generate Height Map"));
             generateHeight = EditorGUILayout.Toggle(generateHeight);
             if (generateHeight)
             {
                 EditorGUILayout.BeginHorizontal();
-                x_height = EditorGUILayout.FloatField("X Height", x_height);
-                y_height = EditorGUILayout.FloatField("Y Height", y_height);
+                x_height = EditorGUILayout.FloatField(string.Format(TranslateString("{0} Height"), "X"), x_height);
+                y_height = EditorGUILayout.FloatField(string.Format(TranslateString("{0} Height"), "Y"), y_height);
                 EditorGUILayout.EndHorizontal();
             }
             EditorGUILayout.EndHorizontal();

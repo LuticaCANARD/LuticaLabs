@@ -34,7 +34,9 @@ namespace LuticaLab.MeshMetro
         {
             GUILayout.Label(label, options);
         }
+        protected string TranslateString(string key) => LanguageDisplayer.Instance.GetTranslatedLanguage(key);
         public abstract void ShowOnMetro();
+
     }
     public class MeshMetroOptionArgument<T>
     {

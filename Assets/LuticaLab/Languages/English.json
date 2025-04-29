@@ -1,0 +1,44 @@
+{
+    "data":
+        {    
+            "Mesh Texture Processor" : "Mesh Texture Processor",
+            "Reference Mesh" : "Reference Mesh",
+            "Original Texture" : "Original Texture",
+            "Show Order Queue Count:{0}" : "Show Order Queue Count:{0}",
+            "Order {0}: {1}" : "Order {0}: {1}",
+            "Remove Order {0}" : "Remove Order {0}",
+            "Order Type: {0}" : "Order Type: {0}",
+            "Volume" : "Volume",
+            "Reference Texture" : "Reference Texture",
+            "Auto Center Select" : "Auto Center Select",
+            "Auto Scale" : "Auto Scale",
+            "Attach Image Size": "Attach Image Size",
+            "Set Point" : "Set Point To deploy reference image",
+            "Angle": "Angle",
+            "{0} Normal": "{0} Normal",
+            "{0} Height" : "{0} Height",
+            "Generate Height Map" : "Generate Height Map",
+            "Generated Texture" :  "Generated Texture",
+            "Generated Normal" : "Generated Normal",
+            "Generated Height" : "Generated Height",
+            "Generated Occlusion" :"Generated Occlusion",
+            "Generated Roughness" : "Generated Roughness",
+            "Generated Metallic" : "Generated Metallic",
+            "Add Order" : "Add Order",
+            "Command Type": "Command Type",
+            "Process Type": "Process Type",
+            "Auto Scale Set": "Auto Scale Set",
+            "Image Size": "Image Size",
+            "Auto Center": "Auto Center",
+            "Add" : "Add",
+
+            "Normal Map Generator" : "Normal Map Generator",
+            "Source Image" : "Source Image",
+            "Normal Map Preview" : "Normal Map Preview",
+            "Generate Normal Map" : "Generate Normal Map",
+            "Save Normal Map" : "Save Normal Map",
+            "Please select a source image" : "Please select a source image",
+            "{0} Factor" : "{0} Factor"
+        }
+    
+}

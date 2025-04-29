@@ -28,21 +28,22 @@ namespace LuticaLab.MeshMetro
         public override void ShowOnMetro()
         {
             EditorGUILayout.BeginHorizontal();
-            GUILayout.Label("Normal Map Generator", EditorStyles.boldLabel);
+            GUILayout.Label( LanguageDisplayer.Instance.GetTranslatedLanguage("Normal Map Generator"), EditorStyles.boldLabel);
             EditorGUILayout.EndHorizontal();
 
-            texTarget = (Texture2D)EditorGUILayout.ObjectField("Source Image", texTarget, typeof(Texture2D), false);
-            xFactor = EditorGUILayout.Slider("X Factor", xFactor, MIN_FACTOR, MAX_FACTOR);
-            yFactor = EditorGUILayout.Slider("Y Factor", yFactor, MIN_FACTOR, MAX_FACTOR);
-            if (GUILayout.Button("Generate Normal Map"))
+            texTarget = (Texture2D)EditorGUILayout.ObjectField(LanguageDisplayer.Instance.GetTranslatedLanguage("Source Image"), texTarget, typeof(Texture2D), false);
+            xFactor = EditorGUILayout.Slider(string.Format(LanguageDisplayer.Instance.GetTranslatedLanguage("{0} Factor"),"X"), xFactor, MIN_FACTOR, MAX_FACTOR);
+            yFactor = EditorGUILayout.Slider(string.Format(LanguageDisplayer.Instance.GetTranslatedLanguage("{0} Factor"), "Y"), yFactor, MIN_FACTOR, MAX_FACTOR);
+            if (GUILayout.Button(LanguageDisplayer.Instance.GetTranslatedLanguage("Generate Normal Map")))
             {
                 GenerateNormalMap();
             }
             if (normalMapPreviewTex != null)
             {
-                if (GUILayout.Button("Save Normal Map"))
+                if (GUILayout.Button(LanguageDisplayer.Instance.GetTranslatedLanguage("Save Normal Map")))
                 {
-                    string path = EditorUtility.SaveFilePanel("Save Normal Map",
+                    string path = EditorUtility.SaveFilePanel(
+                        LanguageDisplayer.Instance.GetTranslatedLanguage("Save Normal Map"),
                         AssetDatabase.GetAssetPath(texTarget),
                         $"NormalMap.png", "png");
                     if (!string.IsNullOrEmpty(path))
@@ -53,7 +54,7 @@ namespace LuticaLab.MeshMetro
                         Log("Normal map saved to: " + path);
                     }
                 }
-                GUILayout.Label("Normal Map Preview:", EditorStyles.boldLabel);
+                GUILayout.Label(LanguageDisplayer.Instance.GetTranslatedLanguage("Normal Map Preview:"), EditorStyles.boldLabel);
                 scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition,true, true);
                 GUILayout.Label(normalMapPreviewTex,
                     GUILayout.Width(normalMapPreviewTex.width),
@@ -67,7 +68,7 @@ namespace LuticaLab.MeshMetro
             normalMapPreviewTex = null;
             if (texTarget == null)
             {
-                Log("Please select a source image.", EditorLogLevel.Warning);
+                Log(LanguageDisplayer.Instance.GetTranslatedLanguage("Please select a source image."), EditorLogLevel.Warning);
                 return;
             }
             if (!texTarget.isReadable) LuticaLabFolderManager.AssetSetReadWrite(texTarget);
