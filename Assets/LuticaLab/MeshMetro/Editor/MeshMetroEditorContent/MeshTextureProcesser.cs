@@ -303,7 +303,6 @@ namespace LuticaLab.MeshMetro
                 EditorGUILayout.EndHorizontal();
             }
             EditorGUILayout.EndHorizontal();
-
             EditorGUILayout.BeginHorizontal();
             EditorGUILayout.LabelField("Generate Height Map");
             generateHeight = EditorGUILayout.Toggle(generateHeight);

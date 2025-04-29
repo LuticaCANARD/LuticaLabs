@@ -28,6 +28,7 @@ namespace LuticaLab
         Contrast,
         Grayscale,
         Median,
+
     }
    
     public static class SKIDUnityConverter
