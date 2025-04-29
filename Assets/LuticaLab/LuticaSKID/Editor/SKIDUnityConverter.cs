@@ -24,9 +24,9 @@ namespace LuticaLab
         ReplaceTexture,
         ColorDifference,
         Invert,
-        Brightness,
-        Contrast,
-        Grayscale,
+        //Brightness,
+        //Contrast,
+        //Grayscale,
         Median,
 
     }
