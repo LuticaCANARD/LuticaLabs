@@ -78,7 +78,7 @@ namespace LuticaLab.MeshMetro
                 xFactor, yFactor
                 )
             ));
-            SKIDImage processedImage = Generator.Process(cmd);
+            SKIDImage processedImage = Generator.Process(cmd, GPUAccelerator);
             normalMapPreviewTex = ConvertToTexture(processedImage);
         }
 

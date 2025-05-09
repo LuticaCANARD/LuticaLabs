@@ -100,7 +100,7 @@ namespace LuticaLab.MeshMetro
                         processCommand
 
                     );
-                    this.resultTexture = ConvertToTexture(Generator.Process(cmd));
+                    this.resultTexture = ConvertToTexture(Generator.Process(cmd, GPUAccelerator));
                 }
                 else
                 {

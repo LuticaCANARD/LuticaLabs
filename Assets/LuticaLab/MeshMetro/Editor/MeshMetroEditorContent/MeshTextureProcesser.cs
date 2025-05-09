@@ -337,7 +337,7 @@ namespace LuticaLab.MeshMetro
                 )
             );
 
-            var processedImage = Generator.Process(cmd);
+            var processedImage = Generator.Process(cmd, GPUAccelerator);
             processedNormal = ConvertToTexture(processedImage);
         }
 
@@ -361,7 +361,7 @@ namespace LuticaLab.MeshMetro
                 )
             );
 
-            var processedImage = Generator.Process(cmd);
+            var processedImage = Generator.Process(cmd, GPUAccelerator);
             processedHeight = ConvertToTexture(processedImage);
         }
 
@@ -386,7 +386,7 @@ namespace LuticaLab.MeshMetro
                 var cmd2 = new ImageProcessInput<ImageProcessInputOption>(imageInte, config: imageProcessInputOption);
                 if (order is SKIDTextureWorkflowSingle)
                 {
-                    imageInte = Generator.Process(ImageProcessCommand.NewProcessImage(cmd2));
+                    imageInte = Generator.Process(ImageProcessCommand.NewProcessImage(cmd2), GPUAccelerator);
                 }
                 else if (order is SKIDTextureWorkflow)
                 {
@@ -425,7 +425,7 @@ namespace LuticaLab.MeshMetro
                                 generated.Volume
                             )
                         )
-                    ));
+                    ), GPUAccelerator);
                 }
             }
 

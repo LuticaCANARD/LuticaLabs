@@ -10,6 +10,8 @@ using static LuticaLab.LuticaLabLogger;
 using System;
 using System.IO;
 using LuticaLab.MeshMetro;
+using ILGPU;
+using ILGPU.Runtime;
 
 namespace LuticaLab
 {
@@ -40,6 +42,7 @@ namespace LuticaLab
             ImageHistogram,
         }
         Dictionary<ImageProcessSelect, MeshMetroEditorContent> content;
+        MeshMetroEditorContent currentPopup;
         static void Log(string message, EditorLogLevel level = EditorLogLevel.Info)
         {
             EditorLogger("SKID/MeshMetro", message, level);
@@ -50,6 +53,25 @@ namespace LuticaLab
             GetWindow<MeshMetroEditor>("MeshMetro");
         }
         ImageProcessSelect select;
+        private readonly Lazy<LuticaSKIDAPI> _generator = new();
+        public LuticaSKIDAPI Generator => _generator.Value;
+        private readonly Lazy<Context> _context = new(()=> Context.CreateDefault());
+        private Accelerator _accelerator = null;
+        public Context Context => _context.Value;
+        public Accelerator Accelerator {
+            get
+            {
+                _accelerator ??= Context.GetPreferredDevice(preferCPU:false).CreateAccelerator(Context);
+                return _accelerator;
+            }
+            set
+            {
+                _accelerator?.Dispose();
+                _accelerator = value;
+            }
+        }
+        
+
         public void OnGUI()
         {
             // TITLE...
@@ -70,8 +92,14 @@ namespace LuticaLab
             EditorGUILayout.Space(15);
             select = (ImageProcessSelect)EditorGUILayout.EnumPopup(select);
             MeshMetroEditorContent meshMetroEditorContent = GetContent(select);
+            ShowGPUSelect();
             if (meshMetroEditorContent != null)
             {
+                if(currentPopup != meshMetroEditorContent)
+                {
+                    meshMetroEditorContent.SetPatentPopup(this);
+                    currentPopup = meshMetroEditorContent;
+                }
                 meshMetroEditorContent.ShowOnMetro();
             }
             else
@@ -79,7 +107,26 @@ namespace LuticaLab
                 UnknownPage();
             }
         }
-
+        void ShowGPUSelect()
+        {
+            GUILayout.Label($"Current GPU: {Accelerator?.Device.Name ?? "None"}");
+            if (GUILayout.Button("Select GPU"))
+            {
+                var devices = Context.Devices;
+                GenericMenu menu = new();
+                foreach (var device in devices)
+                {
+                    menu.AddItem(new GUIContent(device.Name), device == Accelerator?.Device, () =>
+                    {
+                        if (Accelerator != null)
+                            Accelerator.Dispose();
+                        Accelerator = device.CreateAccelerator(Context);
+                        Log($"Selected {device.Name}");
+                    });
+                }
+                menu.ShowAsContext();
+            }
+        }
         MeshMetroEditorContent GetContent(ImageProcessSelect select)
         {
             content ??= new Dictionary<ImageProcessSelect, MeshMetroEditorContent>();

@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using ILGPU.Runtime;
 using LuticaSKID;
 using System;
 using UnityEditor;
@@ -12,10 +13,12 @@ namespace LuticaLab.MeshMetro
     /// </summary>
     public abstract class MeshMetroEditorContent : EditorWindow
     {
-        private readonly Lazy<LuticaSKIDAPI> _generator = new();
+        protected MeshMetroEditor meshMetroEditor;
         protected LuticaSKIDAPI Generator {
-            get => _generator.Value;
+            get => meshMetroEditor.Generator;
         }
+        protected Accelerator GPUAccelerator => meshMetroEditor.Accelerator;
+
         static protected void Log(string message, EditorLogLevel level = EditorLogLevel.Info)
         {
             EditorLogger("SKID/MeshMetro", message, level);
@@ -36,7 +39,10 @@ namespace LuticaLab.MeshMetro
         }
         protected string TranslateString(string key) => LanguageDisplayer.Instance.GetTranslatedLanguage(key);
         public abstract void ShowOnMetro();
-
+        public void SetPatentPopup(MeshMetroEditor parent)
+        {
+            meshMetroEditor = parent;
+        }
     }
     public class MeshMetroOptionArgument<T>
     {

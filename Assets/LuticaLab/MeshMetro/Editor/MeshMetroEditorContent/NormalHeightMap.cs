@@ -47,7 +47,7 @@ namespace LuticaLab.MeshMetro
                                 sourceMesh.triangles
                                 )
                             ));
-                        var convertedImage = Generator.Process(cmd);
+                        var convertedImage = Generator.Process(cmd, GPUAccelerator);
                         normalMapPreviewTex = ConvertToTexture(convertedImage);
                         Log("Normal Map Generated", EditorLogLevel.Info);
                     }

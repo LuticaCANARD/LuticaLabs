@@ -72,7 +72,7 @@ namespace LuticaLab.MeshMetro
                                 addFactor
                             )
                         ));
-                    var convertedImage = Generator.Process(cmd);
+                    var convertedImage = Generator.Process(cmd,GPUAccelerator);
                     debugTime = DateTime.Now - startTime;
                     Log($"Color Mood Calculation Time: {debugTime.TotalMilliseconds} ms", EditorLogLevel.Info);
                     generatedTexture = ConvertToTexture(convertedImage);

@@ -99,7 +99,7 @@ namespace LuticaLab.MeshMetro
             {
                 try
                 {
-                    analyzeResult = (AnalyzeResultTypes.ColorGroupingResult)Generator.AnalyzingColorImage(ImageAnalyzeCommand.NewAnalyzeColorGroup(inputWithSetting));
+                    analyzeResult = (AnalyzeResultTypes.ColorGroupingResult)Generator.AnalyzingColorImage(ImageAnalyzeCommand.NewAnalyzeColorGroup(inputWithSetting), GPUAccelerator);
                 }
                 catch (Exception e)
                 {

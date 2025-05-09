@@ -103,7 +103,7 @@ namespace LuticaLab.MeshMetro
                 )
             );
 
-            var histogramedImg = Generator.AnalyzingColorImage(cmd);
+            var histogramedImg = Generator.AnalyzingColorImage(cmd, GPUAccelerator);
             if (histogramedImg != null)
             {
                 before_width = histogramWidth;

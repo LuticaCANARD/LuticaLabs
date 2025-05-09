@@ -76,7 +76,7 @@ namespace LuticaLab.MeshMetro
             ImageProcessInputOption order = new(cmd,1.1f);
 
             var cmd2 = new ImageProcessInput<ImageProcessInputOption>(skidImage, config: order);
-            var convertedImage = Generator.Process(ImageProcessCommand.NewProcessImage(cmd2));
+            var convertedImage = Generator.Process(ImageProcessCommand.NewProcessImage(cmd2), GPUAccelerator);
 
             texResult = ConvertToTexture(convertedImage);
             Log("Image Processed", EditorLogLevel.Info);
